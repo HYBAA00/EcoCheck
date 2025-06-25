@@ -165,7 +165,7 @@ export default function AuthorityDashboard() {
           textShadow: '0 2px 4px rgba(0,0,0,0.3)'
         }}>
           <Security sx={{ mr: 2, fontSize: 40, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-          Interface Autorité - EcoCompliance
+          Interface Autorité - EcoCheck
         </Typography>
         <Typography variant="subtitle1" sx={{ 
           color: 'rgba(255,255,255,0.9)',

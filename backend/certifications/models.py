@@ -378,3 +378,101 @@ class DocumentArchive(models.Model):
 
     def __str__(self):
         return f"Archive - {self.get_document_type_display()} - Demande {self.certification_request.id}"
+
+class AuthorityNotification(models.Model):
+    """Modèle pour les notifications des autorités"""
+    
+    TYPE_CHOICES = [
+        ('certificate_issued', 'Certificat émis'),
+        ('audit_required', 'Audit requis'),
+        ('expiry_warning', 'Avertissement d\'expiration'),
+        ('report_ready', 'Rapport prêt'),
+        ('compliance_issue', 'Problème de conformité'),
+        ('regulatory_update', 'Mise à jour réglementaire'),
+        ('system_alert', 'Alerte système'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        ('low', 'Faible'),
+        ('medium', 'Moyenne'),
+        ('high', 'Haute'),
+        ('urgent', 'Urgente'),
+    ]
+    
+    # Informations de base
+    title = models.CharField(max_length=200, verbose_name="Titre")
+    message = models.TextField(verbose_name="Message")
+    notification_type = models.CharField(max_length=30, choices=TYPE_CHOICES, verbose_name="Type")
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium', verbose_name="Priorité")
+    
+    # Destinataire (null = toutes les autorités)
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, 
+                                related_name='authority_notifications', verbose_name="Destinataire")
+    
+    # Objet lié (optionnel)
+    content_type = models.CharField(max_length=100, null=True, blank=True, verbose_name="Type d'objet")
+    object_id = models.PositiveIntegerField(null=True, blank=True, verbose_name="ID de l'objet")
+    
+    # Actions possibles
+    action_url = models.URLField(null=True, blank=True, verbose_name="URL d'action")
+    action_label = models.CharField(max_length=50, null=True, blank=True, verbose_name="Label d'action")
+    
+    # Statut
+    is_read = models.BooleanField(default=False, verbose_name="Lu")
+    is_dismissed = models.BooleanField(default=False, verbose_name="Ignoré")
+    
+    # Métadonnées
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Créé le")
+    read_at = models.DateTimeField(null=True, blank=True, verbose_name="Lu le")
+    expires_at = models.DateTimeField(null=True, blank=True, verbose_name="Expire le")
+    
+    # Données supplémentaires
+    metadata = models.JSONField(default=dict, verbose_name="Métadonnées")
+    
+    class Meta:
+        verbose_name = "Notification autorité"
+        verbose_name_plural = "Notifications autorité"
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['recipient', 'is_read']),
+            models.Index(fields=['notification_type']),
+            models.Index(fields=['priority']),
+            models.Index(fields=['created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.title} - {self.get_priority_display()}"
+    
+    def mark_as_read(self):
+        """Marquer comme lu"""
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at'])
+    
+    def dismiss(self):
+        """Ignorer la notification"""
+        self.is_dismissed = True
+        self.save(update_fields=['is_dismissed'])
+    
+    @property
+    def is_expired(self):
+        """Vérifier si la notification a expiré"""
+        if self.expires_at:
+            return timezone.now() > self.expires_at
+        return False
+    
+    @classmethod
+    def create_notification(cls, title, message, notification_type, priority='medium', 
+                          recipient=None, action_url=None, action_label=None, **kwargs):
+        """Créer une nouvelle notification pour les autorités"""
+        return cls.objects.create(
+            title=title,
+            message=message,
+            notification_type=notification_type,
+            priority=priority,
+            recipient=recipient,
+            action_url=action_url,
+            action_label=action_label,
+            **kwargs
+        )

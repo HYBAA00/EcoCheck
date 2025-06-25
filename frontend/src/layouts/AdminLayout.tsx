@@ -67,7 +67,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { text: 'Tableau de bord', icon: <Dashboard />, path: '/admin/dashboard' },
     { text: 'Gestion Utilisateurs', icon: <Group />, path: '/admin/users' },
     { text: 'Demandes de certification', icon: <Assignment />, path: '/admin/certification-requests' },
-    { text: 'Configuration Système', icon: <Settings />, path: '/admin/settings' },
     { text: 'Rapports & Analytics', icon: <Gavel />, path: '/admin/reports' },
     { text: 'Suivi des Paiements', icon: <Business />, path: '/admin/payments' },
   ];
@@ -75,9 +74,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const drawer = (
     <div>
       <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          Administration
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <img 
+            src="/ECO CHECK LOGO.png" 
+            alt="EcoCheck Logo" 
+            style={{ height: 40, width: 'auto' }} 
+          />
+          <Typography variant="h6" noWrap component="div">
+            Administration
+          </Typography>
+        </Box>
       </Toolbar>
       <Divider />
       <List>
@@ -104,9 +110,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <AppBar
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-          bgcolor: 'primary.dark', // Couleur différente pour distinguer l'interface admin
+          width: '100%',
+          ml: 0,
+          bgcolor: 'white',
+          color: '#333',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}
       >
         <Toolbar>
@@ -115,60 +123,80 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             aria-label="ouvrir le menu"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            sx={{ mr: 2, display: { xs: 'block', md: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Plateforme de conformité DEEE - Administration
-          </Typography>
           
-          {/* Notification Bell */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <img 
+              src="/ECO CHECK LOGO.png" 
+              alt="EcoCheck Logo" 
+              style={{ height: 40, width: 'auto' }} 
+            />
+            <Typography variant="h6" noWrap component="div" sx={{ color: '#00A896', mr: 2 }}>
+              EcoCheck
+            </Typography>
+          </Box>
+          
+          {/* Menu items in navbar for desktop - centered */}
+          <Box sx={{ 
+            display: { xs: 'none', md: 'flex' }, 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            flexGrow: 1,
+            gap: 1
+          }}>
+            {menuItems.map((item) => (
+              <IconButton
+                key={item.text}
+                onClick={() => navigate(item.path)}
+                sx={{
+                  color: '#4B5563',
+                  flexDirection: 'column',
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1,
+                  minWidth: '80px',
+                  '&:hover': {
+                    bgcolor: '#f3f4f6',
+                    color: '#00A896'
+                  }
+                }}
+              >
+                {item.icon}
+                <Typography variant="caption" sx={{ fontSize: '10px', mt: 0.5 }}>
+                  {item.text}
+                </Typography>
+              </IconButton>
+            ))}
+          </Box>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="subtitle1" sx={{ color: '#4B5563', display: { xs: 'none', sm: 'block' } }}>
+              Bonjour, {user?.username || 'Admin'}
+            </Typography>
           <NotificationBell />
           
-          <div>
+            {/* Logout button in navbar */}
             <IconButton
-              size="large"
-              aria-label="compte de l'utilisateur"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
+              onClick={handleLogout}
+              sx={{
+                color: '#EF4444',
+                '&:hover': {
+                  bgcolor: '#fef2f2'
+                }
+              }}
             >
-              <Avatar sx={{ bgcolor: 'secondary.main' }}>
-                {user?.username?.[0]?.toUpperCase()}
-              </Avatar>
+              <ExitToApp />
             </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={() => { handleClose(); navigate('/admin/profile'); }}>
-                <Person sx={{ mr: 1 }} />
-                Profil
-              </MenuItem>
-              <MenuItem onClick={handleLogout}>
-                <ExitToApp sx={{ mr: 1 }} />
-                Déconnexion
-              </MenuItem>
-            </Menu>
-          </div>
+          </Box>
         </Toolbar>
       </AppBar>
+      {/* Mobile drawer only */}
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{ width: { xs: drawerWidth, md: 0 }, flexShrink: { xs: 0, md: 0 } }}
         aria-label="menu de navigation"
       >
         <Drawer
@@ -179,19 +207,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             keepMounted: true,
           }}
           sx={{
-            display: { xs: 'block', sm: 'none' },
+            display: { xs: 'block', md: 'none' },
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
-        >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-          open
         >
           {drawer}
         </Drawer>
@@ -201,12 +219,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         sx={{ 
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          bgcolor: 'grey.100',
+          width: '100%',
+          mt: 8,
+          bgcolor: '#f8fafc',
           minHeight: '100vh'
         }}
       >
-        <Toolbar />
         {children}
       </Box>
     </Box>

@@ -35,7 +35,7 @@ import {
 import { authorityAPI } from '../../services/api';
 
 interface Document {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   file_type: string;
@@ -81,7 +81,7 @@ const Documents: React.FC = () => {
 
   const handleDownload = async (document: Document) => {
     try {
-      await authorityAPI.downloadDocument(document.id);
+      await authorityAPI.downloadDocument(document.id.toString());
     } catch (err: any) {
       console.error('Erreur lors du téléchargement:', err);
       setError('Erreur lors du téléchargement du document');
@@ -117,10 +117,15 @@ const Documents: React.FC = () => {
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'policy': return '📋';
-      case 'procedure': return '📖';
-      case 'regulation': return '⚖️';
       case 'report': return '📊';
+      case 'regulation': return '⚖️';
+      case 'certificate': return '📜';
+      case 'procedure': return '📖';
+      case 'technical_report': return '🔬';
+      case 'environmental_study': return '🌱';
+      case 'authorization': return '✅';
+      case 'invoice': return '💰';
+      case 'contract': return '📋';
       default: return '📄';
     }
   };
@@ -159,10 +164,13 @@ const Documents: React.FC = () => {
                   onChange={(e) => setCategoryFilter(e.target.value)}
                 >
                   <MenuItem value="">Toutes</MenuItem>
-                  <MenuItem value="policy">Politiques</MenuItem>
-                  <MenuItem value="procedure">Procédures</MenuItem>
-                  <MenuItem value="regulation">Réglementations</MenuItem>
-                  <MenuItem value="report">Rapports</MenuItem>
+                  <MenuItem value="technical_report">Rapports Techniques</MenuItem>
+                  <MenuItem value="environmental_study">Études Environnementales</MenuItem>
+                  <MenuItem value="authorization">Autorisations</MenuItem>
+                  <MenuItem value="certificate">Certificats</MenuItem>
+                  <MenuItem value="invoice">Factures</MenuItem>
+                  <MenuItem value="contract">Contrats</MenuItem>
+                  <MenuItem value="other">Autres</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

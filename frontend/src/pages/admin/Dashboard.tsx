@@ -250,7 +250,7 @@ export default function AdminDashboard() {
         </Typography>
         <Typography variant="body1" color="text.secondary">
           Accueil → Dashboard
-        </Typography>
+      </Typography>
       </Box>
 
       {/* Stats Cards */}
@@ -313,7 +313,7 @@ export default function AdminDashboard() {
             iconColor="#ef4444"
             iconBgColor="#fecaca"
             onClick={() => navigate('/admin/settings')}
-          />
+                    />
         </Grid>
         
         <Grid item xs={12} md={6} lg={3}>
@@ -327,7 +327,7 @@ export default function AdminDashboard() {
             onClick={() => navigate('/admin/reports')}
           />
         </Grid>
-        
+
         <Grid item xs={12} md={6} lg={3}>
           <ActionCard
             icon={PaymentIcon}

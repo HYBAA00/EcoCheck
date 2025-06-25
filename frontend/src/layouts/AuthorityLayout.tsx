@@ -1,106 +1,92 @@
 import React, { useState } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import {
-  AppBar,
   Box,
   Drawer,
-  IconButton,
+  AppBar,
+  Toolbar,
   List,
+  Typography,
+  Divider,
+  IconButton,
   ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemText,
-  Toolbar,
-  Typography,
-  Avatar,
-  Menu,
-  MenuItem,
-  Divider,
-  Badge,
-  Tooltip,
+  ListItemText
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-  Dashboard,
-  Security,
-  Assignment,
-  Assessment,
-  FileDownload,
-  Visibility,
-  Logout,
-  Person,
-  Settings,
-  Notifications,
-  Home,
+  Dashboard as DashboardIcon,
+  Assignment as AssignmentIcon,
+  Security as SecurityIcon,
+  Description as DescriptionIcon,
+  Assessment as AssessmentIcon,
+  GetApp as GetAppIcon,
+  Visibility as VisibilityIcon,
+  Logout as LogoutIcon
 } from '@mui/icons-material';
-import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../store';
 import { logout } from '../store/slices/authSlice';
+import { RootState } from '../store';
+import AuthorityNotificationBell from '../components/authority/NotificationBell';
+import AuthorityNotificationCenter from '../components/authority/NotificationCenter';
 
 const drawerWidth = 280;
 
 const menuItems = [
   {
     text: 'Tableau de bord',
-    icon: <Dashboard />,
+    icon: <DashboardIcon />,
     path: '/authority/dashboard',
     color: '#667eea'
   },
   {
     text: 'Consultation Certificats',
-    icon: <Security />,
+    icon: <SecurityIcon />,
     path: '/authority/certificates',
     color: '#4CAF50'
   },
   {
     text: 'Journal d\'Audit',
-    icon: <Assignment />,
+    icon: <AssignmentIcon />,
     path: '/authority/audit-journal',
     color: '#2196F3'
   },
   {
     text: 'Rapport d\'Audit',
-    icon: <Assessment />,
+    icon: <AssessmentIcon />,
     path: '/authority/audit-report',
     color: '#FF9800'
   },
   {
     text: 'Export Historiques',
-    icon: <FileDownload />,
+    icon: <GetAppIcon />,
     path: '/authority/export',
     color: '#9C27B0'
   },
   {
     text: 'Documents Lecture',
-    icon: <Visibility />,
+    icon: <VisibilityIcon />,
     path: '/authority/documents',
     color: '#607D8B'
   },
 ];
 
 export default function AuthorityLayout() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [notificationCenterOpen, setNotificationCenterOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
-  
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleProfileMenuClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleLogout = () => {
     dispatch(logout());
+    localStorage.removeItem('token');
     navigate('/auth/login');
   };
 
@@ -113,9 +99,15 @@ export default function AuthorityLayout() {
     <Box sx={{ height: '100%', background: 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)' }}>
       {/* Logo/Header */}
       <Box sx={{ p: 3, textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <Security sx={{ fontSize: 40, color: 'white', mb: 1 }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
+          <img 
+            src="/ECO CHECK LOGO.png" 
+            alt="EcoCheck Logo" 
+            style={{ height: 40, width: 'auto' }} 
+          />
+        </Box>
         <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-          EcoCompliance
+          EcoCheck
         </Typography>
         <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
           Interface Autorité
@@ -186,143 +178,96 @@ export default function AuthorityLayout() {
       <AppBar
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-          backgroundColor: 'white',
-          color: '#2c3e50',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+          width: '100%',
+          ml: 0,
+          bgcolor: 'white',
+          color: '#333',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}
       >
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
+            aria-label="ouvrir le menu"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            sx={{ mr: 2, display: { xs: 'block', md: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
-
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold' }}>
-              Interface Autorité - EcoCompliance
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#7f8c8d' }}>
-              Consultation et audit des certifications DEEE
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <img 
+              src="/ECO CHECK LOGO.png" 
+              alt="EcoCheck Logo" 
+              style={{ height: 40, width: 'auto' }} 
+            />
+            <Typography variant="h6" noWrap component="div" sx={{ color: '#00A896', mr: 2 }}>
+              EcoCheck
             </Typography>
           </Box>
+            
+          {/* Menu items in navbar for desktop - centered */}
+          <Box sx={{ 
+            display: { xs: 'none', md: 'flex' }, 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            flexGrow: 1,
+            gap: 1
+          }}>
+            {menuItems.map((item) => (
+              <IconButton
+                key={item.text}
+                onClick={() => handleNavigation(item.path)}
+                sx={{
+                  color: '#4B5563',
+                  flexDirection: 'column',
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1,
+                  minWidth: '80px',
+                  '&:hover': {
+                    bgcolor: '#f3f4f6',
+                    color: '#00A896'
+                  }
+                }}
+              >
+                {item.icon}
+                <Typography variant="caption" sx={{ fontSize: '10px', mt: 0.5 }}>
+                  {item.text}
+                </Typography>
+              </IconButton>
+            ))}
+          </Box>
 
-          {/* Notifications */}
-          <Tooltip title="Notifications">
-            <IconButton color="inherit" sx={{ mr: 1 }}>
-              <Badge badgeContent={0} color="error">
-                <Notifications />
-              </Badge>
-            </IconButton>
-          </Tooltip>
-
-          {/* Home Button */}
-          <Tooltip title="Accueil">
-            <IconButton color="inherit" onClick={() => navigate('/')} sx={{ mr: 1 }}>
-              <Home />
-            </IconButton>
-          </Tooltip>
-
-          {/* Profile Menu */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
-              {user?.first_name} {user?.last_name}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="subtitle1" sx={{ color: '#4B5563', display: { xs: 'none', sm: 'block' } }}>
+              Bonjour, {user?.first_name} {user?.last_name}
             </Typography>
+            <AuthorityNotificationBell />
+            
+            {/* Logout button in navbar */}
             <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="profile-menu"
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
+              onClick={handleLogout}
+              sx={{
+                color: '#EF4444',
+                '&:hover': {
+                  bgcolor: '#fef2f2'
+                }
+              }}
             >
-              <Avatar sx={{ 
-                width: 32, 
-                height: 32, 
-                backgroundColor: '#667eea',
-                fontSize: '1rem'
-              }}>
-                {user?.first_name?.[0]}{user?.last_name?.[0]}
-              </Avatar>
+              <LogoutIcon />
             </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
 
-      {/* Profile Menu */}
-      <Menu
-        id="profile-menu"
-        anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        keepMounted
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        open={Boolean(anchorEl)}
-        onClose={handleProfileMenuClose}
-        PaperProps={{
-          sx: {
-            mt: 1,
-            minWidth: 200,
-            borderRadius: 2,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-          }
-        }}
-      >
-        <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #e0e0e0' }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-            {user?.first_name} {user?.last_name}
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#7f8c8d' }}>
-            {user?.email}
-          </Typography>
-          <Typography variant="caption" sx={{ 
-            color: '#667eea', 
-            fontWeight: 'bold',
-            textTransform: 'uppercase'
-          }}>
-            Autorité
-          </Typography>
-        </Box>
-        
-        <MenuItem onClick={handleProfileMenuClose}>
-          <ListItemIcon>
-            <Person fontSize="small" />
-          </ListItemIcon>
-          Mon Profil
-        </MenuItem>
-        
-        <MenuItem onClick={handleProfileMenuClose}>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
-          Paramètres
-        </MenuItem>
-        
-        <Divider />
-        
-        <MenuItem onClick={handleLogout} sx={{ color: '#f44336' }}>
-          <ListItemIcon>
-            <Logout fontSize="small" sx={{ color: '#f44336' }} />
-          </ListItemIcon>
-          Déconnexion
-        </MenuItem>
-      </Menu>
 
-      {/* Drawer */}
+
+      {/* Mobile drawer only */}
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{ width: { xs: drawerWidth, md: 0 }, flexShrink: { xs: 0, md: 0 } }}
         aria-label="mailbox folders"
       >
         {/* Mobile drawer */}
@@ -334,29 +279,13 @@ export default function AuthorityLayout() {
             keepMounted: true,
           }}
           sx={{
-            display: { xs: 'block', sm: 'none' },
+            display: { xs: 'block', md: 'none' },
             '& .MuiDrawer-paper': { 
               boxSizing: 'border-box', 
               width: drawerWidth,
               border: 'none',
             },
           }}
-        >
-          {drawer}
-        </Drawer>
-        
-        {/* Desktop drawer */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
-              width: drawerWidth,
-              border: 'none',
-            },
-          }}
-          open
         >
           {drawer}
         </Drawer>
@@ -367,14 +296,21 @@ export default function AuthorityLayout() {
         component="main"
         sx={{
           flexGrow: 1,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: '100%',
+          mt: 8,
+          p: 3,
           minHeight: '100vh',
-          backgroundColor: '#f8f9fa',
+          backgroundColor: '#f8fafc',
         }}
       >
-        <Toolbar />
         <Outlet />
       </Box>
+
+      {/* Notification Center */}
+      <AuthorityNotificationCenter 
+        open={notificationCenterOpen} 
+        onClose={() => setNotificationCenterOpen(false)} 
+      />
     </Box>
   );
 } 

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, permissions, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import CertificationRequest, Certificate, RejectionReport, DailyInfo, Payment, RequestHistory, DynamicForm, LawChecklist, FormSubmission, DocumentArchive, SupportingDocument
+from .models import CertificationRequest, Certificate, RejectionReport, DailyInfo, Payment, RequestHistory, DynamicForm, LawChecklist, FormSubmission, DocumentArchive, SupportingDocument, AuthorityNotification
 from .serializers import (
     CertificationRequestSerializer, CertificationRequestEmployeeSerializer,
     CertificateSerializer, CertificateEmployeeSerializer, PaymentSerializer,
@@ -11,7 +11,7 @@ from .serializers import (
     DocumentArchiveSerializer, EmployeeSerializer, SupportingDocumentSerializer,
     # Serializers pour l'autorité
     CertificateAuthoritySerializer, CertificationRequestAuthoritySerializer,
-    AuditReportSerializer, CompanyAuditSerializer
+    AuditReportSerializer, CompanyAuditSerializer, AuthorityNotificationSerializer
 )
 from accounts.models import Employee, CompanyProfile
 from django.db.models import Count, Sum, Avg
@@ -553,13 +553,61 @@ class CertificationRequestViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError("Seules les entreprises peuvent créer des demandes de certification")
         
         try:
-            # Vérifier que l'utilisateur a un profil d'entreprise
-            if not hasattr(user, 'company_profile'):
-                raise serializers.ValidationError("Votre compte n'est pas associé à un profil d'entreprise. Veuillez contacter l'administrateur.")
+            company_profile = None
             
-            company_profile = user.company_profile
+            # Essayer de récupérer le profil d'entreprise s'il existe
+            if hasattr(user, 'company_profile'):
+                try:
+                    company_profile = user.company_profile
+                except Exception:
+                    company_profile = None
+            
+            # Si pas de profil d'entreprise, créer un profil temporaire basé sur les données soumises
             if not company_profile:
-                raise serializers.ValidationError("Profil d'entreprise introuvable. Veuillez compléter votre profil d'entreprise.")
+                submitted_data = self.request.data.get('submitted_data', {})
+                if isinstance(submitted_data, str):
+                    import json
+                    try:
+                        submitted_data = json.loads(submitted_data)
+                    except json.JSONDecodeError:
+                        submitted_data = {}
+                
+                # Créer ou récupérer un profil d'entreprise basé sur les données du formulaire
+                company_name = submitted_data.get('companyName', user.username)
+                ice_number = submitted_data.get('ice', f'ICE-{user.id}')
+                rc_number = submitted_data.get('rc', f'RC-{user.id}')
+                
+                # Vérifier si un profil existe déjà avec ces informations
+                try:
+                    company_profile = CompanyProfile.objects.get(
+                        user=user
+                    )
+                except CompanyProfile.DoesNotExist:
+                    # Créer un nouveau profil d'entreprise
+                    company_profile = CompanyProfile.objects.create(
+                        user=user,
+                        business_name=company_name,
+                        ice_number=ice_number,
+                        rc_number=rc_number,
+                        responsible_name=submitted_data.get('legalRepresentative', user.get_full_name() or user.username),
+                        address=submitted_data.get('address', ''),
+                        phone_company=submitted_data.get('phone', ''),
+                        description=f"Profil créé automatiquement lors de la demande de certification"
+                    )
+                except Exception as e:
+                    # En cas d'erreur, utiliser des valeurs uniques
+                    import uuid
+                    unique_suffix = str(uuid.uuid4())[:8]
+                    company_profile = CompanyProfile.objects.create(
+                        user=user,
+                        business_name=company_name,
+                        ice_number=f'{ice_number}-{unique_suffix}',
+                        rc_number=f'{rc_number}-{unique_suffix}',
+                        responsible_name=submitted_data.get('legalRepresentative', user.get_full_name() or user.username),
+                        address=submitted_data.get('address', ''),
+                        phone_company=submitted_data.get('phone', ''),
+                        description=f"Profil créé automatiquement lors de la demande de certification"
+                    )
             
             # Sauvegarder avec le profil d'entreprise
             certification_request = serializer.save(
@@ -1659,45 +1707,116 @@ class CompanyAuthorityViewSet(viewsets.ReadOnlyModelViewSet):
     
     @action(detail=False, methods=['get'])
     def documents(self, request):
-        """Documents en lecture seule pour les autorités"""
+        """Documents en lecture seule pour les autorités - Rapports et documents téléchargés par les entreprises"""
         try:
             from django.db.models import Q
             
-            # Récupérer les documents archivés réels
-            documents_queryset = DocumentArchive.objects.select_related('certification_request__company').all()
+            # Récupérer les documents justificatifs réels des entreprises
+            supporting_docs = SupportingDocument.objects.select_related(
+                'certification_request__company'
+            ).all()
+            
+            # Récupérer aussi les documents principaux des demandes
+            cert_requests_with_docs = CertificationRequest.objects.select_related(
+                'company'
+            ).filter(supporting_documents__isnull=False).exclude(supporting_documents='')
             
             search = request.query_params.get('search', '')
             category_filter = request.query_params.get('category', '')
             access_filter = request.query_params.get('access_level', '')
             
+            # Filtrer les documents justificatifs
             if search:
-                documents_queryset = documents_queryset.filter(
-                    Q(title__icontains=search) |
+                supporting_docs = supporting_docs.filter(
+                    Q(name__icontains=search) |
                     Q(description__icontains=search) |
                     Q(certification_request__company__business_name__icontains=search)
                 )
             
             if category_filter:
-                documents_queryset = documents_queryset.filter(category=category_filter)
+                supporting_docs = supporting_docs.filter(document_type=category_filter)
             
-            if access_filter:
-                documents_queryset = documents_queryset.filter(access_level=access_filter)
+            # Filtrer les demandes avec documents principaux
+            if search:
+                cert_requests_with_docs = cert_requests_with_docs.filter(
+                    Q(company__business_name__icontains=search) |
+                    Q(company__ice_number__icontains=search) |
+                    Q(treatment_type__icontains=search)
+                )
             
             # Convertir en format attendu par le frontend
             documents = []
-            for doc in documents_queryset:
+            
+            # Ajouter les documents justificatifs
+            for doc in supporting_docs:
+                # Déterminer le niveau d'accès basé sur le statut de la demande
+                access_level = 'public' if doc.certification_request.status == 'approved' else 'restricted'
+                if doc.certification_request.status == 'rejected':
+                    access_level = 'confidential'
+                
+                # Déterminer la catégorie
+                category_map = {
+                    'technical_report': 'report',
+                    'environmental_study': 'report',
+                    'authorization': 'regulation',
+                    'certificate': 'certificate',
+                    'invoice': 'procedure',
+                    'contract': 'procedure',
+                    'other': 'report'
+                }
+                
+                try:
+                    file_size = doc.file.size if doc.file else 0
+                except:
+                    file_size = 0
+                
                 documents.append({
-                    'id': doc.id,
-                    'title': doc.title,
-                    'description': doc.description,
-                    'file_type': doc.file_type,
-                    'file_size': doc.file_size,
-                    'last_modified': doc.archived_date.isoformat(),
-                    'category': doc.category,
-                    'access_level': doc.access_level,
-                    'version': doc.version,
-                    'author': doc.certification_request.company.business_name if doc.certification_request else 'Système'
+                    'id': f"support_{doc.id}",
+                    'title': doc.name or f"Document {doc.get_document_type_display()}",
+                    'description': doc.description or f"Document justificatif de type {doc.get_document_type_display()}",
+                    'file_type': doc.file.name.split('.')[-1].upper() if doc.file else 'PDF',
+                    'file_size': file_size,
+                    'last_modified': doc.uploaded_at.isoformat(),
+                    'category': category_map.get(doc.document_type, 'report'),
+                    'access_level': access_level,
+                    'version': '1.0',
+                    'author': doc.certification_request.company.business_name,
+                    'company_ice': doc.certification_request.company.ice_number,
+                    'request_id': doc.certification_request.id,
+                    'request_status': doc.certification_request.status,
+                    'treatment_type': doc.certification_request.treatment_type
                 })
+            
+            # Ajouter les documents principaux des demandes
+            for req in cert_requests_with_docs:
+                access_level = 'public' if req.status == 'approved' else 'restricted'
+                if req.status == 'rejected':
+                    access_level = 'confidential'
+                
+                try:
+                    file_size = req.supporting_documents.size if req.supporting_documents else 0
+                except:
+                    file_size = 0
+                
+                documents.append({
+                    'id': f"main_{req.id}",
+                    'title': f"Rapport Principal - {req.company.business_name}",
+                    'description': f"Document principal de la demande de certification pour {req.treatment_type}",
+                    'file_type': req.supporting_documents.name.split('.')[-1].upper() if req.supporting_documents else 'PDF',
+                    'file_size': file_size,
+                    'last_modified': req.submission_date.isoformat(),
+                    'category': 'report',
+                    'access_level': access_level,
+                    'version': '1.0',
+                    'author': req.company.business_name,
+                    'company_ice': req.company.ice_number,
+                    'request_id': req.id,
+                    'request_status': req.status,
+                    'treatment_type': req.treatment_type
+                })
+            
+            # Trier par date de modification (plus récent en premier)
+            documents.sort(key=lambda x: x['last_modified'], reverse=True)
             
             return Response({
                 'results': documents,
@@ -1790,6 +1909,63 @@ class CompanyAuthorityViewSet(viewsets.ReadOnlyModelViewSet):
             logger = logging.getLogger(__name__)
             logger.error(f"Erreur dans audit_report: {str(e)}")
             return Response({'error': 'Erreur lors de la génération du rapport'}, 
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'])
+    def download_document(self, request):
+        """Télécharger un document spécifique"""
+        try:
+            document_id = request.query_params.get('id')
+            if not document_id:
+                return Response({'error': 'ID du document requis'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Déterminer le type de document basé sur l'ID
+            if document_id.startswith('support_'):
+                # Document justificatif
+                doc_id = document_id.replace('support_', '')
+                try:
+                    doc = SupportingDocument.objects.get(id=doc_id)
+                    if doc.file:
+                        from django.http import FileResponse
+                        response = FileResponse(
+                            doc.file.open('rb'),
+                            as_attachment=True,
+                            filename=doc.file.name.split('/')[-1]
+                        )
+                        response['Content-Type'] = 'application/octet-stream'
+                        return response
+                    else:
+                        return Response({'error': 'Fichier non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+                except SupportingDocument.DoesNotExist:
+                    return Response({'error': 'Document non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+            
+            elif document_id.startswith('main_'):
+                # Document principal de demande
+                req_id = document_id.replace('main_', '')
+                try:
+                    req = CertificationRequest.objects.get(id=req_id)
+                    if req.supporting_documents:
+                        from django.http import FileResponse
+                        response = FileResponse(
+                            req.supporting_documents.open('rb'),
+                            as_attachment=True,
+                            filename=req.supporting_documents.name.split('/')[-1]
+                        )
+                        response['Content-Type'] = 'application/octet-stream'
+                        return response
+                    else:
+                        return Response({'error': 'Fichier non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+                except CertificationRequest.DoesNotExist:
+                    return Response({'error': 'Demande non trouvée'}, status=status.HTTP_404_NOT_FOUND)
+            
+            else:
+                return Response({'error': 'Format d\'ID invalide'}, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Erreur dans download_document: {str(e)}")
+            return Response({'error': 'Erreur lors du téléchargement'}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # Stockage temporaire pour les rapports générés (en mémoire)
@@ -2355,3 +2531,71 @@ class ComplianceAuthorityViewSet(viewsets.ViewSet):
             logger.error(f"Erreur dans download compliance: {str(e)}")
             return Response({'error': 'Erreur lors du téléchargement'}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class AuthorityNotificationViewSet(viewsets.ModelViewSet):
+    """ViewSet pour les notifications des autorités"""
+    serializer_class = AuthorityNotificationSerializer
+    permission_classes = [AuthorityPermission]
+
+    def get_queryset(self):
+        user = self.request.user
+        
+        # Filtrer par utilisateur autorité
+        if user.role == 'authority':
+            # Récupérer les notifications pour cette autorité spécifique + les notifications générales
+            from django.db.models import Q
+            return AuthorityNotification.objects.filter(
+                Q(recipient=user) | Q(recipient__isnull=True)
+            ).select_related('recipient')
+        
+        return AuthorityNotification.objects.none()
+    
+    @action(detail=False, methods=['get'])
+    def unread_count(self, request):
+        """Compter les notifications non lues"""
+        count = self.get_queryset().filter(is_read=False, is_dismissed=False).count()
+        return Response({'count': count})
+    
+    @action(detail=False, methods=['get'])
+    def recent(self, request):
+        """Récupérer les notifications récentes (24h)"""
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        recent_time = timezone.now() - timedelta(hours=24)
+        recent_notifications = self.get_queryset().filter(
+            created_at__gte=recent_time,
+            is_dismissed=False
+        )[:10]
+        
+        serializer = self.get_serializer(recent_notifications, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def mark_as_read(self, request, pk=None):
+        """Marquer une notification comme lue"""
+        notification = self.get_object()
+        notification.mark_as_read()
+        
+        return Response({'message': 'Notification marquée comme lue'})
+    
+    @action(detail=True, methods=['post'])
+    def dismiss(self, request, pk=None):
+        """Ignorer une notification"""
+        notification = self.get_object()
+        notification.dismiss()
+        
+        return Response({'message': 'Notification ignorée'})
+    
+    @action(detail=False, methods=['post'])
+    def mark_all_as_read(self, request):
+        """Marquer toutes les notifications comme lues"""
+        updated_count = self.get_queryset().filter(is_read=False).update(
+            is_read=True,
+            read_at=timezone.now()
+        )
+        
+        return Response({
+            'message': f'{updated_count} notifications marquées comme lues',
+            'count': updated_count
+        })

@@ -62,6 +62,7 @@ router.register(r'authority/companies', views.CompanyAuthorityViewSet, basename=
 router.register(r'authority/audit-reports', views.AuditReportAuthorityViewSet, basename='authority-audit-reports')
 router.register(r'authority/exports', views.ExportAuthorityViewSet, basename='authority-exports')
 router.register(r'authority/compliance', views.ComplianceAuthorityViewSet, basename='authority-compliance')
+router.register(r'authority/notifications', views.AuthorityNotificationViewSet, basename='authority-notifications')
 
 urlpatterns = [
     path('', include(router.urls)),

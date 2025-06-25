@@ -91,10 +91,37 @@ export default function DailyInfo() {
 
   const loadDailyInfos = async () => {
     try {
-      // TODO: Remplacer par un appel API réel
-      // const response = await api.get('/certifications/daily-info/');
-      // setDailyInfos(response.data);
+      // Données mockées réalistes pour les 10 derniers jours
+      const mockData: DailyInfo[] = [];
+      const today = new Date();
       
+      for (let i = 9; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        
+        // Génération de données réalistes avec variations logiques
+        const baseWasteCollected = 450 + Math.random() * 200; // Entre 450-650 kg
+        const wasteCollected = Math.round(baseWasteCollected);
+        const wasteTreated = Math.round(wasteCollected * (0.85 + Math.random() * 0.1)); // 85-95% du collecté
+        const recyclingRate = Math.round((wasteTreated / wasteCollected * 100) * 10) / 10; // Taux calculé
+        const energyConsumption = Math.round(120 + Math.random() * 80); // Entre 120-200 kWh
+        const carbonFootprint = Math.round(wasteCollected * 0.1 + Math.random() * 20); // Environ 10% du poids + variation
+        
+        mockData.push({
+          id: i + 1,
+          date: date.toISOString().split('T')[0],
+          waste_collected: wasteCollected,
+          waste_treated: wasteTreated,
+          recycling_rate: recyclingRate,
+          energy_consumption: energyConsumption,
+          carbon_footprint: carbonFootprint,
+        });
+      }
+      
+      // Trier par date décroissante (plus récent en premier)
+      mockData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      setDailyInfos(mockData);
       setLoading(false);
     } catch (error) {
       console.error('Erreur lors du chargement des données journalières:', error);

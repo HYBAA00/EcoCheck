@@ -26,8 +26,11 @@ import {
   Info,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/slices/authSlice';
+import { RootState } from '../store';
+import EnterpriseNotificationBell from '../components/enterprise/NotificationBell';
+import EnterpriseNotificationCenter from '../components/enterprise/NotificationCenter';
 
 const drawerWidth = 240;
 
@@ -37,9 +40,11 @@ interface EnterpriseLayoutProps {
 
 export default function EnterpriseLayout({ children }: EnterpriseLayoutProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [notificationCenterOpen, setNotificationCenterOpen] = React.useState(false);
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -51,12 +56,11 @@ export default function EnterpriseLayout({ children }: EnterpriseLayoutProps) {
   };
 
   const menuItems = [
-    { text: 'Tableau de bord', icon: <Dashboard />, path: '/enterprise/dashboard' },
-    { text: 'Demandes de Certification', icon: <Assignment />, path: '/enterprise/requests' },
-    { text: 'Mes Certificats', icon: <CardMembership />, path: '/enterprise/certificates' },
-    { text: 'Informations Journalières', icon: <Info />, path: '/enterprise/daily-info' },
-    { text: 'Analyses', icon: <Analytics />, path: '/enterprise/analytics' },
-    { text: 'Profil Entreprise', icon: <Person />, path: '/enterprise/profile' },
+    { text: 'Dashboard', icon: <Dashboard />, path: '/enterprise/dashboard' },
+    { text: 'Demandes', icon: <Assignment />, path: '/enterprise/requests' },
+    { text: 'Certificats', icon: <CardMembership />, path: '/enterprise/certificates' },
+    { text: 'Infos Journalières', icon: <Info />, path: '/enterprise/daily-info' },
+    { text: 'Profil', icon: <Person />, path: '/enterprise/profile' },
   ];
 
   const drawer = (
@@ -93,29 +97,93 @@ export default function EnterpriseLayout({ children }: EnterpriseLayoutProps) {
       <AppBar
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          width: { xs: '100%', md: '100%' },
+          ml: { xs: 0, md: 0 },
+          bgcolor: 'white',
+          color: '#333',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}
       >
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
+            aria-label="ouvrir le menu"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            sx={{ mr: 2, display: { xs: 'block', md: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            EcoCompliance - Espace Entreprise
-          </Typography>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <img 
+              src="/ECO CHECK LOGO.png" 
+              alt="EcoCheck Logo" 
+              style={{ height: 40, width: 'auto' }} 
+            />
+            <Typography variant="h6" noWrap component="div" sx={{ color: '#00A896', mr: 2 }}>
+              EcoCheck
+            </Typography>
+          </Box>
+            
+          {/* Menu items in navbar for desktop - centered */}
+          <Box sx={{ 
+            display: { xs: 'none', md: 'flex' }, 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            flexGrow: 1,
+            gap: 1
+          }}>
+            {menuItems.map((item) => (
+              <IconButton
+                key={item.text}
+                onClick={() => navigate(item.path)}
+                sx={{
+                  color: '#4B5563',
+                  flexDirection: 'column',
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1,
+                  minWidth: '80px',
+                  '&:hover': {
+                    bgcolor: '#f3f4f6',
+                    color: '#00A896'
+                  }
+                }}
+              >
+                {item.icon}
+                <Typography variant="caption" sx={{ fontSize: '10px', mt: 0.5 }}>
+                  {item.text}
+                </Typography>
+              </IconButton>
+            ))}
+          </Box>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="subtitle1" sx={{ color: '#4B5563', display: { xs: 'none', sm: 'block' } }}>
+              Bonjour, {user?.business_name || user?.company_name || user?.username || 'Entreprise'}
+            </Typography>
+            <EnterpriseNotificationBell />
+            
+            {/* Logout button in navbar */}
+            <IconButton
+              onClick={handleLogout}
+              sx={{
+                color: '#EF4444',
+                '&:hover': {
+                  bgcolor: '#fef2f2'
+                }
+              }}
+            >
+              <ExitToApp />
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
+      {/* Mobile drawer only */}
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{ width: { xs: drawerWidth, md: 0 }, flexShrink: { xs: 0, md: 0 } }}
       >
         <Drawer
           variant="temporary"
@@ -126,25 +194,12 @@ export default function EnterpriseLayout({ children }: EnterpriseLayoutProps) {
             keepMounted: true, // Better open performance on mobile.
           }}
           sx={{
-            display: { xs: 'block', sm: 'none' },
+            display: { xs: 'block', md: 'none' },
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: drawerWidth,
             },
           }}
-        >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-            },
-          }}
-          open
         >
           {drawer}
         </Drawer>
@@ -154,7 +209,7 @@ export default function EnterpriseLayout({ children }: EnterpriseLayoutProps) {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: '100%',
           mt: 8,
           bgcolor: '#f8fafc',
           minHeight: '100vh',
@@ -162,6 +217,12 @@ export default function EnterpriseLayout({ children }: EnterpriseLayoutProps) {
       >
         {children}
       </Box>
+      
+      {/* Notification Center */}
+      <EnterpriseNotificationCenter 
+        open={notificationCenterOpen}
+        onClose={() => setNotificationCenterOpen(false)}
+      />
     </Box>
   );
 } 

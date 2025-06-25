@@ -83,7 +83,7 @@ class LawViewSet(viewsets.ModelViewSet):
     queryset = Law.objects.all()
     serializer_class = LawSerializer
     permission_classes = [IsAdminPermission]
-    
+
     def get_queryset(self):
         queryset = Law.objects.all()
         category = self.request.query_params.get('category', None)
@@ -153,7 +153,7 @@ class SystemConfigurationViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(category=category)
             
         return queryset.order_by('category', 'name')
-    
+
     @action(detail=False, methods=['get'])
     def categories(self, request):
         """Liste des catégories de configuration"""
@@ -711,7 +711,7 @@ class AdminNotificationViewSet(viewsets.ModelViewSet):
         )
         
         return Response({'message': f'{count} notifications marquées comme lues'})
-    
+
     @action(detail=False, methods=['get'])
     def unread_count(self, request):
         """Compter les notifications non lues"""

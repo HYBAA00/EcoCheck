@@ -116,9 +116,13 @@ return (
             <ArrowBack />
           </IconButton>
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <Nature sx={{ mr: 1, fontSize: 32, color: '#10b981' }} />
+            <img 
+              src="/ECO CHECK LOGO.png" 
+              alt="EcoCheck Logo" 
+              style={{ height: 40, width: 'auto', marginRight: '12px' }} 
+            />
             <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'white' }}>
-              EcoCompliance
+              EcoCheck
             </Typography>
           </Box>
         </Toolbar>
@@ -176,7 +180,7 @@ return (
                   fontSize: '1.1rem'
                 }}
               >
-                Connectez-vous à votre compte EcoCompliance
+                Connectez-vous à votre compte EcoCheck
               </Typography>
             </Box>
 

@@ -32,16 +32,27 @@ import {
   ArrowBack,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { certificateAPI } from '../../services/api';
 
 interface Certificate {
   id: number;
   number: string;
-  treatmentType: string;
-  issueDate: string;
-  expiryDate: string;
+  treatment_type: string;
+  issue_date: string;
+  expiry_date: string;
   status: 'active' | 'expired' | 'revoked';
-  pdfUrl: string;
-  requestId: number;
+  pdf_file: string;
+  certification_request: {
+    id: number;
+    company: {
+      business_name: string;
+      ice_number: string;
+    };
+    treatment_type: string;
+    submission_date: string;
+    status: string;
+  };
+  is_active: boolean;
 }
 
 function CertificatesPage() {
@@ -56,10 +67,9 @@ function CertificatesPage() {
 
   const loadCertificates = async () => {
     try {
-      // TODO: Remplacer par appel API réel
-      // const response = await api.get('/certifications/certificates/');
-      // setCertificates(response.data);
-      
+      setLoading(true);
+      const response = await certificateAPI.getCertificates();
+      setCertificates(response.data);
       setLoading(false);
     } catch (error) {
       console.error('Erreur lors du chargement des certificats:', error);
@@ -87,42 +97,53 @@ function CertificatesPage() {
 
   const handleDownload = (certificate: Certificate) => {
     // Télécharger le certificat
-    window.open(certificate.pdfUrl, '_blank');
+    certificateAPI.downloadCertificate(certificate.id);
   };
 
   const handleView = (certificate: Certificate) => {
     // Ouvrir le certificat dans un nouvel onglet
-    window.open(certificate.pdfUrl, '_blank');
+    if (certificate.pdf_file) {
+      window.open(`http://localhost:8000${certificate.pdf_file}`, '_blank');
+    } else {
+      // Rediriger vers la page de visualisation du certificat
+      window.open(`/certificate/${certificate.certification_request.id}`, '_blank');
+    }
   };
 
   const handlePrint = (certificate: Certificate) => {
     // Imprimer le certificat
-    const printWindow = window.open(certificate.pdfUrl, '_blank');
+    if (certificate.pdf_file) {
+      const printWindow = window.open(`http://localhost:8000${certificate.pdf_file}`, '_blank');
     if (printWindow) {
       printWindow.addEventListener('load', () => {
         printWindow.print();
       });
+      }
     }
   };
 
   const handleShare = (certificate: Certificate) => {
     // Partager le certificat
+    const shareUrl = certificate.pdf_file 
+      ? `http://localhost:8000${certificate.pdf_file}`
+      : `${window.location.origin}/certificate/${certificate.certification_request.id}`;
+      
     if (navigator.share) {
       navigator.share({
         title: `Certificat ${certificate.number}`,
-        text: `Certificat de ${certificate.treatmentType} DEEE`,
-        url: certificate.pdfUrl,
+        text: `Certificat de ${certificate.treatment_type} DEEE`,
+        url: shareUrl,
       });
     } else {
       // Fallback - copier le lien
-      navigator.clipboard.writeText(window.location.origin + certificate.pdfUrl);
+      navigator.clipboard.writeText(shareUrl);
       alert('Lien copié dans le presse-papiers');
     }
   };
 
   const filteredCertificates = certificates.filter(cert =>
     cert.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cert.treatmentType.toLowerCase().includes(searchTerm.toLowerCase())
+    cert.treatment_type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const activeCertificates = certificates.filter(cert => cert.status === 'active');
@@ -216,7 +237,7 @@ function CertificatesPage() {
           }}>
             <CardContent>
               <Typography variant="h4" fontWeight="bold">
-                {new Set(certificates.map(c => c.treatmentType)).size}
+                {new Set(certificates.map(c => c.treatment_type)).size}
               </Typography>
               <Typography variant="body2">
                 Types de Traitement
@@ -298,24 +319,24 @@ function CertificatesPage() {
                             {certificate.number}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            Demande #{certificate.requestId.toString().padStart(3, '0')}
+                            Demande #{certificate.certification_request.id.toString().padStart(3, '0')}
                           </Typography>
                         </Box>
                       </Box>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {certificate.treatmentType}
+                        {certificate.treatment_type}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {new Date(certificate.issueDate).toLocaleDateString('fr-FR')}
+                        {new Date(certificate.issue_date).toLocaleDateString('fr-FR')}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {new Date(certificate.expiryDate).toLocaleDateString('fr-FR')}
+                        {new Date(certificate.expiry_date).toLocaleDateString('fr-FR')}
                       </Typography>
                     </TableCell>
                     <TableCell>

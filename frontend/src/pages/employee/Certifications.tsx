@@ -73,14 +73,114 @@ export default function EmployeeCertifications() {
       setLoading(true);
       setError(null);
 
-      // Temporairement, utiliser des données par défaut
-      setCertificates([]);
+      // Données mockées de certificats validés par l'employé
+      const mockCertificates: Certificate[] = [
+        {
+          id: 1,
+          number: "DEEE-2025-8E5B4E46",
+          issue_date: "2024-12-15",
+          expiry_date: "2025-12-15",
+          treatment_type: "Recyclage",
+          status: "active",
+          is_active: true,
+          company_name: "EcoTech Solutions",
+          company_ice: "002345678000045",
+          validated_by_name: "Vous",
+          request_date: "2024-12-10"
+        },
+        {
+          id: 2,
+          number: "DEEE-2024-7F3A2B91",
+          issue_date: "2024-11-20",
+          expiry_date: "2025-11-20",
+          treatment_type: "Tri",
+          status: "active",
+          is_active: true,
+          company_name: "GreenCorp Industries",
+          company_ice: "002876543000098",
+          validated_by_name: "Vous",
+          request_date: "2024-11-15"
+        },
+        {
+          id: 3,
+          number: "DEEE-2024-9D4C8A12",
+          issue_date: "2024-10-05",
+          expiry_date: "2025-10-05",
+          treatment_type: "Réutilisation",
+          status: "active",
+          is_active: true,
+          company_name: "RecycleMax",
+          company_ice: "002123456000021",
+          validated_by_name: "Vous",
+          request_date: "2024-09-30"
+        },
+        {
+          id: 4,
+          number: "DEEE-2024-5B8E1F67",
+          issue_date: "2024-08-12",
+          expiry_date: "2024-08-12",
+          treatment_type: "Élimination",
+          status: "expired",
+          is_active: false,
+          company_name: "WasteTech Pro",
+          company_ice: "002987654000076",
+          validated_by_name: "Vous",
+          request_date: "2024-08-05"
+        },
+        {
+          id: 5,
+          number: "DEEE-2024-3C9F2E45",
+          issue_date: "2024-09-18",
+          expiry_date: "2025-09-18",
+          treatment_type: "Recyclage",
+          status: "active",
+          is_active: true,
+          company_name: "EcoSolutions SARL",
+          company_ice: "002456789000054",
+          validated_by_name: "Vous",
+          request_date: "2024-09-12"
+        }
+      ];
+
+      // Filtrer selon les critères de recherche
+      let filteredCertificates = mockCertificates;
+
+      if (searchTerm) {
+        filteredCertificates = filteredCertificates.filter(cert =>
+          cert.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cert.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cert.treatment_type.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+
+      if (statusFilter) {
+        filteredCertificates = filteredCertificates.filter(cert => {
+          if (statusFilter === 'active') return cert.status === 'active' && cert.is_active;
+          if (statusFilter === 'expired') return cert.status === 'expired' || !cert.is_active;
+          if (statusFilter === 'revoked') return !cert.is_active;
+          return true;
+        });
+      }
+
+      if (treatmentFilter) {
+        filteredCertificates = filteredCertificates.filter(cert =>
+          cert.treatment_type.toLowerCase() === treatmentFilter.toLowerCase()
+        );
+      }
+
+      setCertificates(filteredCertificates);
+
+      // Calculer les statistiques
+      const activeCerts = mockCertificates.filter(cert => cert.status === 'active' && cert.is_active);
+      const expiredCerts = mockCertificates.filter(cert => cert.status === 'expired' || !cert.is_active);
+
       setStats({
-        total_certificates: 0,
-        active_certificates: 0,
-        expired_certificates: 0,
-        my_validations: 0
+        total_certificates: mockCertificates.length,
+        active_certificates: activeCerts.length,
+        expired_certificates: expiredCerts.length,
+        my_validations: mockCertificates.length // Tous sont validés par l'employé
       });
+
     } catch (err: any) {
       console.error('Erreur lors du chargement des certificats:', err);
       setError('Impossible de charger les certificats');

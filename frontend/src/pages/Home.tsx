@@ -23,6 +23,54 @@ import {
   Security,
   Nature,
 } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
+
+
+// Styled components with animations
+const AnimatedButton = styled(Button)`
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  &:hover {
+    animation: pulse 1s infinite;
+  }
+`;
+
+const GradientBackground = styled(Box)`
+  background: linear-gradient(135deg, #00A896 0%, #1976d2 100%);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 60%);
+    animation: rotate 30s linear infinite;
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+`;
+
+const LogoContainer = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+`;
 
 const Home = () => {
   const navigate = useNavigate();
@@ -80,146 +128,149 @@ const Home = () => {
   ];
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <AppBar 
-        position="static" 
+        position="fixed" 
         elevation={0}
         sx={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          py: 1
+          background: 'white',
+          backdropFilter: 'blur(10px)',
+          py: 1,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}
       >
-        <Toolbar>
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <Nature sx={{ mr: 1, fontSize: 32, color: '#10b981' }} />
-            <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'white' }}>
-              EcoCompliance
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <LogoContainer>
+            <img 
+              src="/ECO CHECK LOGO.png" 
+              alt="EcoCheck Logo" 
+              style={{ height: 40, width: 'auto' }} 
+            />
+            <Typography 
+              variant="h5" 
+              component="div" 
+              sx={{ 
+                fontWeight: 'bold', 
+                color: '#00A896',
+                fontSize: { xs: '1.2rem', md: '1.5rem' }
+              }}
+            >
+              EcoCheck
             </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 3 }}>
-            <Button 
-              color="inherit" 
-              sx={{ color: 'white', fontWeight: 500 }}
-              onClick={() => scrollToSection('accueil')}
+          </LogoContainer>
+
+          <Box sx={{ 
+            display: 'flex', 
+            gap: { xs: 1, md: 3 },
+            '& .MuiButton-root': {
+              color: '#333',
+              fontWeight: 500,
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                backgroundColor: 'rgba(0, 168, 150, 0.1)'
+              }
+            }
+          }}>
+            <Button color="inherit" onClick={() => scrollToSection('accueil')}>Accueil</Button>
+            <Button color="inherit" onClick={() => scrollToSection('fonctionnalites')}>Fonctionnalités</Button>
+            <Button color="inherit" onClick={() => scrollToSection('apropos')}>À propos</Button>
+            <Button color="inherit" onClick={() => scrollToSection('contact')}>Contact</Button>
+            <AnimatedButton 
+              variant="contained" 
+              sx={{ 
+                bgcolor: '#00A896',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: '#008080'
+                }
+              }}
+              onClick={() => navigate('/login')}
             >
-              Accueil
-            </Button>
-            <Button 
-              color="inherit" 
-              sx={{ color: 'white', fontWeight: 500 }}
-              onClick={() => scrollToSection('fonctionnalites')}
-            >
-              Fonctionnalités
-            </Button>
-            <Button 
-              color="inherit" 
-              sx={{ color: 'white', fontWeight: 500 }}
-              onClick={() => scrollToSection('apropos')}
-            >
-              À propos
-            </Button>
-            <Button 
-              color="inherit" 
-              sx={{ color: 'white', fontWeight: 500 }}
-              onClick={() => scrollToSection('contact')}
-            >
-              Contact
-            </Button>
+              Se connecter
+            </AnimatedButton>
           </Box>
         </Toolbar>
       </AppBar>
 
       {/* Hero Section */}
-      <Box
+      <GradientBackground
         id="accueil"
         sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          flexGrow: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           color: 'white',
-          py: 12,
-          textAlign: 'center',
+          pt: 8,
+          minHeight: '100vh'
         }}
       >
-        <Container maxWidth="lg">
+        <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
+          <Box sx={{ 
+            maxWidth: '800px', 
+            mx: 'auto',
+            animation: 'fadeIn 1s ease-out',
+            '@keyframes fadeIn': {
+              from: { opacity: 0, transform: 'translateY(20px)' },
+              to: { opacity: 1, transform: 'translateY(0)' }
+            }
+          }}>
           <Typography
             variant="h2"
             component="h1"
             sx={{
               fontWeight: 'bold',
-              mb: 2,
-              fontSize: { xs: '2.5rem', md: '4rem' },
+                mb: 3,
+                fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
+                lineHeight: 1.2,
+                textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
             }}
           >
-            Plateforme Intelligente
+              Gérez vos certifications<br />en toute simplicité
           </Typography>
+
           <Typography
-            variant="h2"
-            component="h1"
-            sx={{
-              fontWeight: 'bold',
-              mb: 4,
-              fontSize: { xs: '2.5rem', md: '4rem' },
-            }}
-          >
-            DEEE
-          </Typography>
-          <Typography
-            variant="h6"
+              variant="h5"
             sx={{
               mb: 6,
-              maxWidth: '800px',
-              mx: 'auto',
-              fontSize: { xs: '1.1rem', md: '1.3rem' },
+                opacity: 0.9,
+                fontSize: { xs: '1rem', md: '1.2rem' },
               lineHeight: 1.6,
+                maxWidth: '600px',
+                mx: 'auto'
             }}
           >
             Solution numérique avancée pour la vérification de la conformité
-            environnementale des entreprises de gestion des Déchets d'Équipements
-            Électriques et Électroniques au Maroc
+              environnementale des entreprises de gestion des DEEE au Maroc
           </Typography>
-          <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button
+
+            <AnimatedButton
               variant="contained"
               size="large"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/register')}
               sx={{
-                bgcolor: '#10b981',
+                bgcolor: '#00A896',
                 color: 'white',
-                px: 4,
+                px: 6,
                 py: 2,
                 fontSize: '1.1rem',
                 fontWeight: 'bold',
-                borderRadius: 3,
+                borderRadius: 2,
+                boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
                 '&:hover': {
-                  bgcolor: '#059669',
-                },
+                  bgcolor: '#008080',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
+                }
               }}
             >
-              Commencer l'Évaluation
-            </Button>
-            <Button
-              variant="outlined"
-              size="large"
-              onClick={() => scrollToSection('apropos')}
-              sx={{
-                color: 'white',
-                borderColor: 'white',
-                px: 4,
-                py: 2,
-                fontSize: '1.1rem',
-                fontWeight: 'bold',
-                borderRadius: 3,
-                '&:hover': {
-                  bgcolor: alpha('#ffffff', 0.1),
-                  borderColor: 'white',
-                },
-              }}
-            >
-              En savoir plus
-            </Button>
+              COMMENCER L'ÉVALUATION
+            </AnimatedButton>
           </Box>
         </Container>
-      </Box>
+      </GradientBackground>
 
       {/* Features Section */}
       <Box sx={{ bgcolor: '#ffffff', py: 10 }}>
@@ -363,75 +414,80 @@ const Home = () => {
       <Box
         id="contact"
         sx={{
-          bgcolor: '#1f2937',
-          color: 'white',
+          bgcolor: 'white',
+          color: '#333',
           py: 6,
+          boxShadow: '0 -2px 4px rgba(0,0,0,0.1)'
         }}
       >
         <Container maxWidth="lg">
           <Grid container spacing={4}>
             <Grid item xs={12} md={3}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Nature sx={{ mr: 1, fontSize: 28, color: '#10b981' }} />
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  EcoCompliance
+                <img 
+                  src="/ECO CHECK LOGO.png" 
+                  alt="EcoCheck Logo" 
+                  style={{ height: 28, width: 'auto', marginRight: '8px' }} 
+                />
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#00A896' }}>
+                  EcoCheck
                 </Typography>
               </Box>
-              <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+              <Typography variant="body2" sx={{ color: '#4b5563' }}>
                 Plateforme intelligente dédiée à la vérification de la conformité
                 environnementale des entreprises DEEE au Maroc.
               </Typography>
             </Grid>
             <Grid item xs={12} md={3}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#10b981' }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#00A896' }}>
                 Liens Utiles
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+                <Typography variant="body2" sx={{ color: '#4b5563', '&:hover': { color: '#00A896' } }}>
                   Documentation
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+                <Typography variant="body2" sx={{ color: '#4b5563', '&:hover': { color: '#00A896' } }}>
                   Support technique
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+                <Typography variant="body2" sx={{ color: '#4b5563', '&:hover': { color: '#00A896' } }}>
                   Formations
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+                <Typography variant="body2" sx={{ color: '#4b5563', '&:hover': { color: '#00A896' } }}>
                   API
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} md={3}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#10b981' }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#00A896' }}>
                 Contact
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Typography variant="body2" sx={{ color: '#9ca3af' }}>
-                  Email: contact@ecocompliance.ma
+                <Typography variant="body2" sx={{ color: '#4b5563' }}>
+                  Email: contact@ecocheck.ma
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+                <Typography variant="body2" sx={{ color: '#4b5563' }}>
                   Téléphone: +212 5XX XX XX XX
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+                <Typography variant="body2" sx={{ color: '#4b5563' }}>
                   Adresse: Casablanca, Maroc
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} md={3}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#10b981' }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#00A896' }}>
                 Réglementation
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+                <Typography variant="body2" sx={{ color: '#4b5563', '&:hover': { color: '#00A896' } }}>
                   Lois marocaines DEEE
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+                <Typography variant="body2" sx={{ color: '#4b5563', '&:hover': { color: '#00A896' } }}>
                   Standards ISO
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+                <Typography variant="body2" sx={{ color: '#4b5563', '&:hover': { color: '#00A896' } }}>
                   Certifications
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+                <Typography variant="body2" sx={{ color: '#4b5563', '&:hover': { color: '#00A896' } }}>
                   Conformité
                 </Typography>
               </Box>
@@ -439,14 +495,14 @@ const Home = () => {
           </Grid>
           <Box
             sx={{
-              borderTop: '1px solid #374151',
+              borderTop: '1px solid #e5e7eb',
               mt: 6,
               pt: 4,
               textAlign: 'center',
             }}
           >
-            <Typography variant="body2" sx={{ color: '#9ca3af' }}>
-              © 2025 EcoCompliance. Tous droits réservés. | Conçu pour la conformité environnementale au Maroc
+            <Typography variant="body2" sx={{ color: '#4b5563' }}>
+              © 2025 EcoCheck. Tous droits réservés. | Conçu pour la conformité environnementale au Maroc
             </Typography>
           </Box>
         </Container>

@@ -178,228 +178,304 @@ export default function EnterpriseDashboard() {
   }
 
   return (
-    <Box>
+    <Box sx={{ p: 3 }}>
       {/* En-tête */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          fontWeight: 'bold'
-        }}>
+        <Typography variant="h4" sx={{ color: '#1F2937', fontWeight: 'bold', mb: 1 }}>
           Espace Entreprise
         </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
+        <Typography variant="subtitle1" sx={{ color: '#6B7280' }}>
           Gestion complète de vos demandes de certification DEEE
         </Typography>
       </Box>
 
-      {/* Statistiques rapides */}
+      {/* Cartes de statistiques */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={2}>
-          <Card sx={{ 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            textAlign: 'center',
-            '&:hover': { transform: 'translateY(-4px)', transition: 'all 0.3s ease' }
-          }}>
-            <CardContent>
-              <Assignment sx={{ fontSize: 40, mb: 1 }} />
-              <Typography variant="h4" fontWeight="bold">
-                {stats.totalRequests}
-              </Typography>
-              <Typography variant="body2">
-                Demandes Totales
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+        {stats.totalRequests > 0 && (
+          <Grid item xs={12} sm={6} md={2}>
+            <Card
+              sx={{
+                bgcolor: "#3B82F6",
+                color: 'white',
+                borderRadius: 2,
+                height: '100%',
+                minHeight: 140,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'transform 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                },
+              }}
+            >
+              <CardContent>
+                <Typography variant="h3" component="div" sx={{ mb: 1, fontWeight: 'bold' }}>
+                  {stats.totalRequests}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Demandes Totales
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Assignment sx={{ color: 'white', fontSize: 32 }} />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
         
-        <Grid item xs={12} sm={6} md={2}>
-          <Card sx={{ 
-            background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
-            color: 'white',
-            textAlign: 'center',
-            '&:hover': { transform: 'translateY(-4px)', transition: 'all 0.3s ease' }
-          }}>
-            <CardContent>
-              <CheckCircle sx={{ fontSize: 40, mb: 1 }} />
-              <Typography variant="h4" fontWeight="bold">
-                {stats.approvedRequests}
-              </Typography>
-              <Typography variant="body2">
-                Approuvées
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+        {stats.approvedRequests > 0 && (
+          <Grid item xs={12} sm={6} md={2}>
+            <Card
+              sx={{
+                bgcolor: "#10B981",
+                color: 'white',
+                borderRadius: 2,
+                height: '100%',
+                minHeight: 140,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'transform 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                },
+              }}
+            >
+              <CardContent>
+                <Typography variant="h3" component="div" sx={{ mb: 1, fontWeight: 'bold' }}>
+                  {stats.approvedRequests}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Approuvées
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <CheckCircle sx={{ color: 'white', fontSize: 32 }} />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
 
-        <Grid item xs={12} sm={6} md={2}>
-          <Card sx={{ 
-            background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
-            color: 'white',
-            textAlign: 'center',
-            '&:hover': { transform: 'translateY(-4px)', transition: 'all 0.3s ease' }
-          }}>
-            <CardContent>
-              <Schedule sx={{ fontSize: 40, mb: 1 }} />
-              <Typography variant="h4" fontWeight="bold">
-                {stats.pendingRequests}
-              </Typography>
-              <Typography variant="body2">
-                En Attente
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+        {stats.pendingRequests > 0 && (
+          <Grid item xs={12} sm={6} md={2}>
+            <Card
+              sx={{
+                bgcolor: "#F97316",
+                color: 'white',
+                borderRadius: 2,
+                height: '100%',
+                minHeight: 140,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'transform 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                },
+              }}
+            >
+              <CardContent>
+                <Typography variant="h3" component="div" sx={{ mb: 1, fontWeight: 'bold' }}>
+                  {stats.pendingRequests}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  En Attente
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Schedule sx={{ color: 'white', fontSize: 32 }} />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
 
-        <Grid item xs={12} sm={6} md={2}>
-          <Card sx={{ 
-            background: 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)',
-            color: 'white',
-            textAlign: 'center',
-            '&:hover': { transform: 'translateY(-4px)', transition: 'all 0.3s ease' }
-          }}>
-            <CardContent>
-              <CardMembership sx={{ fontSize: 40, mb: 1 }} />
-              <Typography variant="h4" fontWeight="bold">
-                {stats.certificatesCount}
-              </Typography>
-              <Typography variant="body2">
-                Certificats
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+        {stats.certificatesCount > 0 && (
+          <Grid item xs={12} sm={6} md={2}>
+            <Card
+              sx={{
+                bgcolor: "#0EA5E9",
+                color: 'white',
+                borderRadius: 2,
+                height: '100%',
+                minHeight: 140,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'transform 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                },
+              }}
+            >
+              <CardContent>
+                <Typography variant="h3" component="div" sx={{ mb: 1, fontWeight: 'bold' }}>
+                  {stats.certificatesCount}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Certificats
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <CardMembership sx={{ color: 'white', fontSize: 32 }} />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
 
-        <Grid item xs={12} sm={6} md={2}>
-          <Card sx={{ 
-            background: 'linear-gradient(135deg, #e91e63 0%, #c2185b 100%)',
-            color: 'white',
-            textAlign: 'center',
-            '&:hover': { transform: 'translateY(-4px)', transition: 'all 0.3s ease' }
-          }}>
-            <CardContent>
-              <Badge badgeContent={stats.pendingPayments} color="error">
-                <Payment sx={{ fontSize: 40, mb: 1 }} />
-              </Badge>
-              <Typography variant="h4" fontWeight="bold">
-                {stats.pendingPayments}
-              </Typography>
-              <Typography variant="body2">
-                Paiements Dus
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+        {stats.pendingPayments > 0 && (
+          <Grid item xs={12} sm={6} md={2}>
+            <Card
+              sx={{
+                bgcolor: "#EC4899",
+                color: 'white',
+                borderRadius: 2,
+                height: '100%',
+                minHeight: 140,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'transform 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                },
+              }}
+            >
+              <CardContent>
+                <Typography variant="h3" component="div" sx={{ mb: 1, fontWeight: 'bold' }}>
+                  {stats.pendingPayments}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Paiements Dus
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Warning sx={{ color: 'white', fontSize: 32 }} />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
 
-        <Grid item xs={12} sm={6} md={2}>
-          <Card sx={{ 
-            background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
-            color: 'white',
-            textAlign: 'center',
-            '&:hover': { transform: 'translateY(-4px)', transition: 'all 0.3s ease' }
-          }}>
-            <CardContent>
-              <Cancel sx={{ fontSize: 40, mb: 1 }} />
-              <Typography variant="h4" fontWeight="bold">
-                {stats.rejectedRequests}
-              </Typography>
-              <Typography variant="body2">
-                Rejetées
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+        {stats.rejectedRequests > 0 && (
+          <Grid item xs={12} sm={6} md={2}>
+            <Card
+              sx={{
+                bgcolor: "#EF4444",
+                color: 'white',
+                borderRadius: 2,
+                height: '100%',
+                minHeight: 140,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'transform 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                },
+              }}
+            >
+              <CardContent>
+                <Typography variant="h3" component="div" sx={{ mb: 1, fontWeight: 'bold' }}>
+                  {stats.rejectedRequests}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Rejetées
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Cancel sx={{ color: 'white', fontSize: 32 }} />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
       </Grid>
 
-      {/* Actions rapides */}
-      <Card sx={{ mb: 4, background: 'linear-gradient(135deg, #f8f9ff 0%, #e8eeff 100%)' }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom sx={{ color: '#667eea', fontWeight: 'bold' }}>
-            Actions Rapides
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Button
-                fullWidth
-                variant="contained"
-                startIcon={<Add />}
-                onClick={() => navigate('/enterprise/certification-form')}
-                sx={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                  },
-                  py: 1.5
-                }}
-              >
-                Nouvelle Demande
-              </Button>
-            </Grid>
-            
-            <Grid item xs={12} sm={6} md={3}>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<Payment />}
-                onClick={() => navigate('/enterprise/payments')}
-                sx={{ 
-                  borderColor: '#667eea', 
-                  color: '#667eea',
-                  '&:hover': {
-                    borderColor: '#5a6fd8',
-                    backgroundColor: 'rgba(102, 126, 234, 0.04)'
-                  },
-                  py: 1.5
-                }}
-              >
-                Paiements
-              </Button>
-            </Grid>
-            
-            <Grid item xs={12} sm={6} md={3}>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<CardMembership />}
-                onClick={() => navigate('/enterprise/certificates')}
-                sx={{ 
-                  borderColor: '#4caf50', 
-                  color: '#4caf50',
-                  '&:hover': {
-                    borderColor: '#45a049',
-                    backgroundColor: 'rgba(76, 175, 80, 0.04)'
-                  },
-                  py: 1.5
-                }}
-              >
-                Mes Certificats
-              </Button>
-            </Grid>
-            
-            <Grid item xs={12} sm={6} md={3}>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<History />}
-                onClick={() => navigate('/enterprise/history')}
-                sx={{ 
-                  borderColor: '#ff9800', 
-                  color: '#ff9800',
-                  '&:hover': {
-                    borderColor: '#f57c00',
-                    backgroundColor: 'rgba(255, 152, 0, 0.04)'
-                  },
-                  py: 1.5
-                }}
-              >
-                Historique Complet
-              </Button>
-            </Grid>
+      {/* Actions Rapides */}
+      <Box sx={{ bgcolor: 'white', borderRadius: 2, p: 3, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+        <Typography variant="h6" sx={{ mb: 3, color: '#1F2937', fontWeight: 'bold' }}>
+          Actions Rapides
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => navigate('/enterprise/certification-form')}
+              fullWidth
+              sx={{
+                py: 2,
+                bgcolor: '#3B82F6',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: '#2563EB',
+                },
+              }}
+            >
+              Nouvelle Demande
+            </Button>
           </Grid>
-        </CardContent>
-      </Card>
+          
+          <Grid item xs={12} sm={6} md={3}>
+            <Button
+              variant="outlined"
+              startIcon={<Payment />}
+              onClick={() => navigate('/enterprise/payments')}
+              fullWidth
+              sx={{
+                py: 2,
+                borderColor: '#3B82F6',
+                color: '#3B82F6',
+                '&:hover': {
+                  borderColor: '#2563EB',
+                  backgroundColor: 'rgba(59, 130, 246, 0.04)',
+                },
+              }}
+            >
+              Paiements
+            </Button>
+          </Grid>
+          
+          <Grid item xs={12} sm={6} md={3}>
+            <Button
+              variant="outlined"
+              startIcon={<CardMembership />}
+              onClick={() => navigate('/enterprise/certificates')}
+              fullWidth
+              sx={{
+                py: 2,
+                borderColor: '#10B981',
+                color: '#10B981',
+                '&:hover': {
+                  borderColor: '#059669',
+                  backgroundColor: 'rgba(16, 185, 129, 0.04)',
+                },
+              }}
+            >
+              Mes Certificats
+            </Button>
+          </Grid>
+          
+          <Grid item xs={12} sm={6} md={3}>
+            <Button
+              variant="outlined"
+              startIcon={<History />}
+              onClick={() => navigate('/enterprise/history')}
+              fullWidth
+              sx={{
+                py: 2,
+                borderColor: '#F97316',
+                color: '#F97316',
+                '&:hover': {
+                  borderColor: '#EA580C',
+                  backgroundColor: 'rgba(249, 115, 24, 0.04)',
+                },
+              }}
+            >
+              Historique Complet
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
 
       {/* Demandes récentes */}
       <Card>

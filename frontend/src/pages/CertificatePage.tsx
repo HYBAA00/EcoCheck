@@ -256,64 +256,7 @@ export default function CertificatePage() {
             }}
           />
           
-          {imageLoaded && (
-            <>
-              {/* Nom de l'entreprise - Centre */}
-              <Box sx={{
-                position: 'absolute',
-                top: '45%',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                textAlign: 'center',
-                color: '#333',
-                fontWeight: 'bold',
-                fontSize: { xs: '16px', sm: '18px', md: '20px' },
-                textShadow: '1px 1px 2px rgba(255,255,255,0.8)',
-                maxWidth: '60%'
-              }}>
-                {certificate.certification_request.company.business_name}
-              </Box>
-              
-              {/* Numéro de certificat - Haut droite */}
-              <Box sx={{
-                position: 'absolute',
-                top: '25%',
-                right: '10%',
-                color: '#333',
-                fontWeight: 'bold',
-                fontSize: { xs: '12px', sm: '13px', md: '14px' },
-                textShadow: '1px 1px 2px rgba(255,255,255,0.8)'
-              }}>
-                N° {certificate.number}
-              </Box>
-              
-              {/* Date d'émission - Bas gauche */}
-              <Box sx={{
-                position: 'absolute',
-                bottom: '20%',
-                left: '20%',
-                color: '#333',
-                fontWeight: 'bold',
-                fontSize: { xs: '11px', sm: '12px', md: '13px' },
-                textShadow: '1px 1px 2px rgba(255,255,255,0.8)'
-              }}>
-                {new Date(certificate.issue_date).toLocaleDateString('fr-FR')}
-              </Box>
-              
-              {/* Date d'expiration - Bas droite */}
-              <Box sx={{
-                position: 'absolute',
-                bottom: '20%',
-                right: '20%',
-                color: '#333',
-                fontWeight: 'bold',
-                fontSize: { xs: '11px', sm: '12px', md: '13px' },
-                textShadow: '1px 1px 2px rgba(255,255,255,0.8)'
-              }}>
-                {new Date(certificate.expiry_date).toLocaleDateString('fr-FR')}
-              </Box>
-            </>
-          )}
+
         </Box>
       </Paper>
 

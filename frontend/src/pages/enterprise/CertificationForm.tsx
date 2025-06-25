@@ -43,7 +43,7 @@ import {
   FactoryOutlined,
   Send,
 } from '@mui/icons-material';
-import { certificationAPI } from '../../services/api';
+import { certificationAPI, certificateAPI } from '../../services/api';
 
 // Types de traitement disponibles
 const treatmentTypes = [
@@ -246,19 +246,27 @@ export default function CertificationForm() {
       console.log('- treatment_type:', formData.treatmentType);
       console.log('- submitted_data:', submittedData);
       console.log('- documents:', formData.documents.map(f => f.name));
+      
+      // Debug: afficher toutes les clés du FormData
+      console.log('FormData keys:');
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(`${key}:`, value);
+      }
 
       // Créer la demande via l'API avec FormData
       const response = await certificationAPI.createRequestWithFiles(formDataToSend);
       
-      // Si la demande a été créée avec succès et qu'il y a plusieurs documents,
-      // uploader les documents supplémentaires
+      console.log('Demande créée avec succès:', response.data);
+      
+      // Optionnel : upload de documents supplémentaires si nécessaire
+      // Cette partie est commentée pour éviter les erreurs - peut être activée plus tard
+      /*
       if (response.data && formData.documents.length > 1) {
         const requestId = response.data.id;
         const additionalFormData = new FormData();
         
         additionalFormData.append('certification_request', requestId.toString());
         
-        // Ajouter tous les fichiers sauf le premier (déjà uploadé comme document principal)
         formData.documents.slice(1).forEach((file, index) => {
           additionalFormData.append('files', file);
           additionalFormData.append(`name_${index}`, file.name);
@@ -267,13 +275,13 @@ export default function CertificationForm() {
         });
         
         try {
-          await certificationAPI.uploadMultipleSupportingDocuments(additionalFormData);
+          await certificateAPI.uploadMultipleSupportingDocuments(additionalFormData);
           console.log('Documents additionnels uploadés avec succès');
         } catch (docError) {
           console.warn('Erreur lors de l\'upload des documents additionnels:', docError);
-          // Ne pas faire échouer la demande pour cela
         }
       }
+      */
       
       // Rediriger vers la liste des demandes
       navigate('/enterprise/requests');

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     CertificationRequest, Certificate, Payment, RejectionReport, 
     DailyInfo, RequestHistory, DynamicForm, LawChecklist, 
-    FormSubmission, DocumentArchive, SupportingDocument
+    FormSubmission, DocumentArchive, SupportingDocument, AuthorityNotification
 )
 from accounts.models import CompanyProfile, Employee, User
 from accounts.serializers import CompanyProfileSerializer, EmployeeSerializer, UserSerializer
@@ -196,9 +196,11 @@ class CertificationRequestSerializer(serializers.ModelSerializer):
     validated_by_name = serializers.SerializerMethodField()
     reviewed_by_name = serializers.SerializerMethodField()
     form_submission = serializers.SerializerMethodField()
+    # Rendre le champ company optionnel lors de la création
+    company = serializers.PrimaryKeyRelatedField(queryset=CompanyProfile.objects.all(), required=False, allow_null=True)
     # additional_documents = SupportingDocumentSerializer(many=True, read_only=True)
     # all_documents = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CertificationRequest
         fields = [
@@ -426,3 +428,16 @@ class CompanyAuditSerializer(serializers.ModelSerializer):
     def get_last_request_date(self, obj):
         last_request = obj.certification_requests.order_by('-submission_date').first()
         return last_request.submission_date if last_request else None
+
+class AuthorityNotificationSerializer(serializers.ModelSerializer):
+    """Serializer pour les notifications des autorités"""
+    
+    class Meta:
+        model = AuthorityNotification
+        fields = [
+            'id', 'title', 'message', 'notification_type', 'priority',
+            'recipient', 'content_type', 'object_id', 'action_url', 'action_label',
+            'is_read', 'is_dismissed', 'created_at', 'read_at', 'expires_at',
+            'metadata', 'is_expired'
+        ]
+        read_only_fields = ['created_at', 'read_at', 'is_expired']

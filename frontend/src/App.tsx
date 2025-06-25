@@ -26,14 +26,16 @@ import EnterpriseProfile from './pages/enterprise/Profile';
 import AuthProvider from './components/AuthProvider';
 import AdminDashboard from './pages/admin/Dashboard';
 import UserManagement from './pages/admin/UserManagement';
-import SystemSettings from './pages/admin/SystemSettings';
 import Reports from './pages/admin/Reports';
 import PaymentManagement from './pages/admin/PaymentManagement';
+import AdminCertificationRequests from './pages/admin/CertificationRequests';
+import AdminProfile from './pages/admin/Profile';
 import EmployeeDashboard from './pages/employee/Dashboard';
 import EmployeeCertifications from './pages/employee/Certifications';
 import EmployeeRequests from './pages/employee/Requests';
 import ValidationPage from './pages/employee/Validation';
 import RequestDetails from './pages/employee/RequestDetails';
+import EmployeeProfile from './pages/employee/Profile';
 import EnterpriseDashboard from './pages/enterprise/Dashboard';
 import CertificationRequests from './pages/enterprise/CertificationRequests';
 import CertificationForm from './pages/enterprise/CertificationForm';
@@ -50,16 +52,82 @@ import AuditJournal from './pages/authority/AuditJournal';
 import AuditReport from './pages/authority/AuditReport';
 import ExportHistorical from './pages/authority/ExportHistorical';
 import AuthorityDocuments from './pages/authority/Documents';
+import AuthorityProfile from './pages/authority/Profile';
+import AuthoritySettings from './pages/authority/Settings';
 import CertificatePage from './pages/CertificatePage';
 
 // Create theme
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#00A896',
+      light: '#02C39A',
+      dark: '#028090',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#1976d2',
+      light: '#42a5f5',
+      dark: '#1565c0',
+    },
+    background: {
+      default: '#f8fafc',
+      paper: '#ffffff',
+    },
+  },
+  typography: {
+    fontFamily: '"Poppins", sans-serif',
+    h1: {
+      fontWeight: 700,
+    },
+    h2: {
+      fontWeight: 700,
+    },
+    h3: {
+      fontWeight: 600,
+    },
+    h4: {
+      fontWeight: 600,
+    },
+    h5: {
+      fontWeight: 500,
+    },
+    h6: {
+      fontWeight: 500,
+    },
+    button: {
+      textTransform: 'none',
+      fontWeight: 500,
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          padding: '8px 16px',
+        },
+        contained: {
+          boxShadow: '0 4px 14px rgba(0, 0, 0, 0.1)',
+          '&:hover': {
+            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.2)',
+          },
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          boxShadow: '0 4px 14px rgba(0, 0, 0, 0.1)',
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+        },
+      },
     },
   },
 });
@@ -143,10 +211,10 @@ function AppContent() {
                     <Routes>
                       <Route path="dashboard" element={<AdminDashboard />} />
                       <Route path="users" element={<UserManagement />} />
-                      <Route path="settings" element={<SystemSettings />} />
+                      <Route path="certification-requests" element={<AdminCertificationRequests />} />
                       <Route path="reports" element={<Reports />} />
                       <Route path="payments" element={<PaymentManagement />} />
-                      <Route path="profile" element={<EnterpriseProfile />} />
+                      <Route path="profile" element={<AdminProfile />} />
                       <Route path="*" element={<Navigate to="/admin/dashboard" />} />
                     </Routes>
                   </AdminLayout>
@@ -175,7 +243,7 @@ function AppContent() {
                       <Route path="laws" element={<div>Checklist des Lois</div>} />
                       <Route path="archives" element={<div>Archives</div>} />
                       <Route path="history" element={<div>Historique Employé</div>} />
-                      <Route path="profile" element={<EnterpriseProfile />} />
+                      <Route path="profile" element={<EmployeeProfile />} />
                       <Route path="*" element={<Navigate to="/employee/dashboard" />} />
                     </Routes>
                   </EmployeeLayout>
@@ -230,7 +298,8 @@ function AppContent() {
               <Route path="export" element={<ExportHistorical />} />
               <Route path="documents" element={<AuthorityDocuments />} />
               <Route path="compliance-report" element={<div>Rapport de Conformité</div>} />
-              <Route path="profile" element={<EnterpriseProfile />} />
+              <Route path="profile" element={<AuthorityProfile />} />
+              <Route path="settings" element={<AuthoritySettings />} />
               <Route path="*" element={<Navigate to="/authority/dashboard" />} />
             </Route>
 

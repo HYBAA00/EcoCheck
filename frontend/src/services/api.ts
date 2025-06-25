@@ -527,13 +527,13 @@ export const authorityAPI = {
   // Documents en lecture seule
   getDocuments: (params?: string) => api.get(`/certifications/authority/companies/documents/${params ? `?${params}` : ''}`),
   getDocument: (id: number) => api.get(`/certifications/authority/companies/documents/${id}/`),
-  downloadDocument: (id: number) => {
-    return api.get(`/certifications/authority/companies/documents/${id}/download/`, {
+  downloadDocument: (documentId: string) => {
+    return api.get(`/certifications/authority/companies/download_document/?id=${documentId}`, {
       responseType: 'blob',
     }).then(response => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const contentDisposition = response.headers['content-disposition'];
-      let filename = `document_${id}.pdf`;
+      let filename = `document_${documentId}.pdf`;
       
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="?([^"]*)"?/);
@@ -586,15 +586,14 @@ export const authorityAPI = {
     });
   },
 
-  // Endpoints pour les notifications admin
-  getNotifications: () => api.get('/regulations/admin/notifications/'),
-  getUnreadNotificationsCount: () => api.get('/regulations/admin/notifications/unread_count/'),
-  getRecentNotifications: () => api.get('/regulations/admin/notifications/recent/'),
-  markNotificationAsRead: (id: number) => api.post(`/regulations/admin/notifications/${id}/mark_as_read/`),
-  dismissNotification: (id: number) => api.post(`/regulations/admin/notifications/${id}/dismiss/`),
-  markAllNotificationsAsRead: () => api.post('/regulations/admin/notifications/mark_all_as_read/'),
-  createNotification: (data: any) => api.post('/regulations/admin/notifications/create_notification/', data),
-  deleteNotification: (id: number) => api.delete(`/regulations/admin/notifications/${id}/`),
+  // Notifications pour les autorités
+  getNotifications: () => api.get('/certifications/authority/notifications/'),
+  getUnreadNotificationsCount: () => api.get('/certifications/authority/notifications/unread_count/'),
+  getRecentNotifications: () => api.get('/certifications/authority/notifications/recent/'),
+  markNotificationAsRead: (id: number) => api.post(`/certifications/authority/notifications/${id}/mark_as_read/`),
+  dismissNotification: (id: number) => api.post(`/certifications/authority/notifications/${id}/dismiss/`),
+  markAllNotificationsAsRead: () => api.post('/certifications/authority/notifications/mark_all_as_read/'),
+  deleteNotification: (id: number) => api.delete(`/certifications/authority/notifications/${id}/`),
 };
 
 export default api;

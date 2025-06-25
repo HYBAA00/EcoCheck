@@ -31,9 +31,6 @@ import { authAPI } from '../../services/api';
 
 const roleOptions = [
   { value: 'enterprise', label: 'Entreprise' },
-  { value: 'employee', label: 'Employé' },
-  { value: 'authority', label: 'Autorité' },
-  { value: 'admin', label: 'Administrateur' },
 ];
 
 const initialValues = {
@@ -41,24 +38,13 @@ const initialValues = {
   email: '',
   password: '',
   confirmPassword: '',
-  role: '',
+  role: 'enterprise',
   // Entreprise
   business_name: '',
   ice_number: '',
   rc_number: '',
   responsible_name: '',
   address: '',
-  // Employé
-  position: '',
-  hire_date: '',
-  supervisor: '',
-  // Autorité
-  organization: '',
-  sector: '',
-  region: '',
-  // Admin
-  level: '',
-  department: '',
 };
 
 const validationSchema = Yup.object({
@@ -87,28 +73,12 @@ export default function Register() {
       email: values.email,
       password: values.password,
       role: values.role,
+      business_name: values.business_name,
+      ice_number: values.ice_number,
+      rc_number: values.rc_number,
+      responsible_name: values.responsible_name,
+      address: values.address,
     };
-    if (values.role === 'enterprise') {
-      dataToSend.business_name = values.business_name;
-      dataToSend.ice_number = values.ice_number;
-      dataToSend.rc_number = values.rc_number;
-      dataToSend.responsible_name = values.responsible_name;
-      dataToSend.address = values.address;
-    }
-    if (values.role === 'employee') {
-      dataToSend.position = values.position;
-      dataToSend.hire_date = values.hire_date;
-      if (values.supervisor) dataToSend.supervisor = values.supervisor;
-    }
-    if (values.role === 'authority') {
-      dataToSend.organization = values.organization;
-      dataToSend.sector = values.sector;
-      dataToSend.region = values.region;
-    }
-    if (values.role === 'admin') {
-      dataToSend.level = values.level;
-      dataToSend.department = values.department;
-    }
     try {
       await authAPI.register(dataToSend);
       setSuccess('Inscription réussie !');
@@ -129,29 +99,14 @@ export default function Register() {
     setShowConfirmPassword((prev) => !prev);
   };
 
-  // Validation dynamique selon le rôle
+  // Validation des champs entreprise
   const validateRoleFields = (values: any) => {
     const errors: Record<string, string> = {};
-    if (values.role === 'enterprise') {
-      if (!values.business_name) errors.business_name = 'Champ obligatoire';
-      if (!values.ice_number) errors.ice_number = 'Champ obligatoire';
-      if (!values.rc_number) errors.rc_number = 'Champ obligatoire';
-      if (!values.responsible_name) errors.responsible_name = 'Champ obligatoire';
-      if (!values.address) errors.address = 'Champ obligatoire';
-    }
-    if (values.role === 'employee') {
-      if (!values.position) errors.position = 'Champ obligatoire';
-      if (!values.hire_date) errors.hire_date = 'Champ obligatoire';
-    }
-    if (values.role === 'authority') {
-      if (!values.organization) errors.organization = 'Champ obligatoire';
-      if (!values.sector) errors.sector = 'Champ obligatoire';
-      if (!values.region) errors.region = 'Champ obligatoire';
-    }
-    if (values.role === 'admin') {
-      if (!values.level) errors.level = 'Champ obligatoire';
-      if (!values.department) errors.department = 'Champ obligatoire';
-    }
+    if (!values.business_name) errors.business_name = 'Champ obligatoire';
+    if (!values.ice_number) errors.ice_number = 'Champ obligatoire';
+    if (!values.rc_number) errors.rc_number = 'Champ obligatoire';
+    if (!values.responsible_name) errors.responsible_name = 'Champ obligatoire';
+    if (!values.address) errors.address = 'Champ obligatoire';
     return errors;
   };
 
@@ -165,164 +120,65 @@ export default function Register() {
       '& .MuiInputLabel-root.Mui-focused': { color: '#667eea' },
     };
 
-    switch (values.role) {
-      case 'enterprise':
-        return (
-          <>
-            <TextField 
-              fullWidth 
-              label="Raison sociale" 
-              name="business_name" 
-              value={values.business_name} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.business_name && touched.business_name} 
-              helperText={touched.business_name && errors.business_name} 
-              sx={fieldStyle}
-            />
-            <TextField 
-              fullWidth 
-              label="ICE" 
-              name="ice_number" 
-              value={values.ice_number} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.ice_number && touched.ice_number} 
-              helperText={touched.ice_number && errors.ice_number} 
-              sx={fieldStyle}
-            />
-            <TextField 
-              fullWidth 
-              label="RC" 
-              name="rc_number" 
-              value={values.rc_number} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.rc_number && touched.rc_number} 
-              helperText={touched.rc_number && errors.rc_number} 
-              sx={fieldStyle}
-            />
-            <TextField 
-              fullWidth 
-              label="Responsable" 
-              name="responsible_name" 
-              value={values.responsible_name} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.responsible_name && touched.responsible_name} 
-              helperText={touched.responsible_name && errors.responsible_name} 
-              sx={fieldStyle}
-            />
-            <TextField 
-              fullWidth 
-              label="Adresse" 
-              name="address" 
-              value={values.address} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.address && touched.address} 
-              helperText={touched.address && errors.address} 
-              sx={{ ...fieldStyle, gridColumn: '1 / -1' }}
-            />
-          </>
-        );
-      case 'employee':
-        return (
-          <>
-            <TextField 
-              fullWidth 
-              label="Poste" 
-              name="position" 
-              value={values.position} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.position && touched.position} 
-              helperText={touched.position && errors.position} 
-              sx={fieldStyle}
-            />
-            <TextField 
-              fullWidth 
-              label="Date d'embauche" 
-              name="hire_date" 
-              type="date" 
-              InputLabelProps={{ shrink: true }} 
-              value={values.hire_date} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.hire_date && touched.hire_date} 
-              helperText={touched.hire_date && errors.hire_date} 
-              sx={fieldStyle}
-            />
-          </>
-        );
-      case 'authority':
-        return (
-          <>
-            <TextField 
-              fullWidth 
-              label="Organisme" 
-              name="organization" 
-              value={values.organization} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.organization && touched.organization} 
-              helperText={touched.organization && errors.organization} 
-              sx={fieldStyle}
-            />
-            <TextField 
-              fullWidth 
-              label="Secteur" 
-              name="sector" 
-              value={values.sector} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.sector && touched.sector} 
-              helperText={touched.sector && errors.sector} 
-              sx={fieldStyle}
-            />
-            <TextField 
-              fullWidth 
-              label="Région" 
-              name="region" 
-              value={values.region} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.region && touched.region} 
-              helperText={touched.region && errors.region} 
-              sx={fieldStyle}
-            />
-          </>
-        );
-      case 'admin':
-        return (
-          <>
-            <TextField 
-              fullWidth 
-              label="Niveau" 
-              name="level" 
-              value={values.level} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.level && touched.level} 
-              helperText={touched.level && errors.level} 
-              sx={fieldStyle}
-            />
-            <TextField 
-              fullWidth 
-              label="Département" 
-              name="department" 
-              value={values.department} 
-              onChange={handleChange} 
-              onBlur={handleBlur} 
-              error={!!errors.department && touched.department} 
-              helperText={touched.department && errors.department} 
-              sx={fieldStyle}
-            />
-          </>
-        );
-      default:
-        return null;
-    }
+    return (
+      <>
+        <TextField 
+          fullWidth 
+          label="Raison sociale" 
+          name="business_name" 
+          value={values.business_name} 
+          onChange={handleChange} 
+          onBlur={handleBlur} 
+          error={!!errors.business_name && touched.business_name} 
+          helperText={touched.business_name && errors.business_name} 
+          sx={fieldStyle}
+        />
+        <TextField 
+          fullWidth 
+          label="ICE" 
+          name="ice_number" 
+          value={values.ice_number} 
+          onChange={handleChange} 
+          onBlur={handleBlur} 
+          error={!!errors.ice_number && touched.ice_number} 
+          helperText={touched.ice_number && errors.ice_number} 
+          sx={fieldStyle}
+        />
+        <TextField 
+          fullWidth 
+          label="RC" 
+          name="rc_number" 
+          value={values.rc_number} 
+          onChange={handleChange} 
+          onBlur={handleBlur} 
+          error={!!errors.rc_number && touched.rc_number} 
+          helperText={touched.rc_number && errors.rc_number} 
+          sx={fieldStyle}
+        />
+        <TextField 
+          fullWidth 
+          label="Responsable" 
+          name="responsible_name" 
+          value={values.responsible_name} 
+          onChange={handleChange} 
+          onBlur={handleBlur} 
+          error={!!errors.responsible_name && touched.responsible_name} 
+          helperText={touched.responsible_name && errors.responsible_name} 
+          sx={fieldStyle}
+        />
+        <TextField 
+          fullWidth 
+          label="Adresse" 
+          name="address" 
+          value={values.address} 
+          onChange={handleChange} 
+          onBlur={handleBlur} 
+          error={!!errors.address && touched.address} 
+          helperText={touched.address && errors.address} 
+          sx={{ ...fieldStyle, gridColumn: '1 / -1' }}
+        />
+      </>
+    );
   };
 
   return (
@@ -345,9 +201,13 @@ export default function Register() {
             <ArrowBack />
           </IconButton>
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <Nature sx={{ mr: 1, fontSize: 32, color: '#10b981' }} />
+            <img 
+              src="/ECO CHECK LOGO.png" 
+              alt="EcoCheck Logo" 
+              style={{ height: 40, width: 'auto', marginRight: '12px' }} 
+            />
             <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'white' }}>
-              EcoCompliance
+              EcoCheck
             </Typography>
           </Box>
         </Toolbar>
@@ -405,7 +265,7 @@ export default function Register() {
                   fontSize: '1.1rem'
                 }}
               >
-                Créez votre compte EcoCompliance
+                Créez votre compte EcoCheck
               </Typography>
             </Box>
 
@@ -560,45 +420,15 @@ export default function Register() {
                     />
                   </Box>
 
-                  <TextField
-                    select
-                    fullWidth
-                    required
-                    name="role"
-                    label="Rôle"
-                    value={values.role}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.role && Boolean(errors.role)}
-                    helperText={touched.role && errors.role}
-                    sx={{
-                      mb: 3,
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        '&:hover fieldset': { borderColor: '#667eea' },
-                        '&.Mui-focused fieldset': { borderColor: '#667eea' },
-                      },
-                      '& .MuiInputLabel-root.Mui-focused': { color: '#667eea' },
-                    }}
-                  >
-                    {roleOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-
-                  {/* Champs dynamiques selon le rôle */}
-                  {values.role && (
-                    <Box sx={{ mb: 3 }}>
-                      <Typography variant="h6" sx={{ mb: 2, color: '#1f2937', fontWeight: 600 }}>
-                        Informations spécifiques
-                      </Typography>
-                      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
-                        {renderRoleFields(values, errors, touched, handleChange, handleBlur)}
-                      </Box>
+                  {/* Informations entreprise */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="h6" sx={{ mb: 2, color: '#1f2937', fontWeight: 600 }}>
+                      Informations de l'entreprise
+                    </Typography>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+                      {renderRoleFields(values, errors, touched, handleChange, handleBlur)}
                     </Box>
-                  )}
+                  </Box>
 
                   <Button 
                     type="submit" 
